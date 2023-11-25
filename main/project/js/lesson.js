@@ -56,10 +56,124 @@ tabsItemsParent.onclick = (event) => {
             if (event.target === tabItem) {
                 hideTabsContentCards()
                 showTabsContentCards(tabItemIndex)
-
+                index = tabItemIndex
                 clearInterval(intervalId)
             }
         })
     }
 }
 
+
+//Converter
+
+// const somInput = document.querySelector("#som");
+// const usdInput = document.querySelector("#usd");
+// const eurInput = document.querySelector("#eur");
+//
+// const converter = (element, targetElement, type) => {
+//     element.oninput = () => {
+//         const request = new XMLHttpRequest();
+//         request.open('GET','../data/converter.json');
+//         request.setRequestHeader('Content-type', 'application/json');
+//         request.send()
+//
+//         request.onload = ()=> {
+//             const data = JSON.parse(request.response)
+//             switch (type){
+//                 case 'som':
+//                     targetElement.value = (element.value / data.usd).toFixed(2);
+//                     break;
+//                 case 'usd':
+//                     targetElement.value = (element.value * data.usd).toFixed(2);
+//                     break;
+//                 case 'eur':
+//                     targetElement.value = (element.value * data.eur).toFixed(2);
+//                     break;
+//                 default:
+//                     break;
+//             }
+//
+//             element.value === "" && (targetElement.value = "")
+//         }
+//     }
+// }
+//
+// converter(somInput, usdInput, 'som');
+// converter(usdInput, somInput, 'usd');
+// converter(usdInput, eurInput, 'eur');
+// converter(eurInput, usdInput, 'usd')
+
+
+// Версия с if/else
+// if (type === 'som') {
+//     targetElement.value = (element.value/data.usd).toFixed(2)
+// }else  if (type ==='usd') {
+//     targetElement.value = (element.value*data.usd).toFixed(2)
+// }
+
+
+//Converter
+
+const somInput = document.querySelector("#som");
+const usdInput = document.querySelector("#usd");
+const eurInput = document.querySelector("#eur");
+const converter = (element, targetElement1, targetElement2, type) => {
+    element.oninput = () => {
+        const request = new XMLHttpRequest();
+        request.open('GET', '../data/converter.json');
+        request.setRequestHeader('Content-type', 'application/json');
+        request.send();
+
+        request.onload = () => {
+            const data = JSON.parse(request.response);
+            switch (type) {
+                case 'som':
+                    targetElement1.value = convertCurrency(element.value, data.som / data.usd).toFixed(2);
+                    targetElement2.value = convertCurrency(element.value, data.som / data.eur).toFixed(2);
+                    break;
+                case 'usd':
+                    targetElement1.value = convertCurrency(element.value, data.usd * data.som).toFixed(2);
+                    targetElement2.value = convertCurrency(element.value, data.usd / data.eur).toFixed(2);
+                    break;
+                case 'eur':
+                    targetElement1.value = convertCurrency(element.value, data.eur / data.usd).toFixed(2);
+                    targetElement2.value = convertCurrency(element.value, data.eur * data.som).toFixed(2);
+                    break;
+                default:
+                    break;
+            }
+
+            element.value === "" && (targetElement1.value = targetElement2.value = "");
+        };
+    };
+};
+
+const convertCurrency = (amount, exchangeRate) => {
+    return amount * exchangeRate;
+};
+
+converter(somInput, usdInput, eurInput, 'som', 'usd', 'eur');
+converter(usdInput, somInput, eurInput, 'usd', 'som', 'eur');
+converter(eurInput, usdInput, somInput, 'eur', 'usd', 'som');
+
+
+//CARD switcher
+
+const card = document.querySelector('.card');
+const btnPrev = document.querySelector('#btn-prev');
+const btnNext = document.querySelector('#btn-prev');
+
+let count = 0
+
+btnNext.onclick = () => {
+    count++
+    fetch(`https://jsonplaceholder.typicode.com/todos/${count}`)
+        .then(response => response.json())
+        .then(data => {
+            card.innerHTML = `
+            <p> ${data.title} </p>
+            <p> <style = "color: ${data.completed ? 'green' : 'red'}">${data.completed}</style></p>
+            <span>${data.id}</span>
+        `
+    })
+}
